@@ -128,7 +128,7 @@ async def start(client, message):
     
 
 # Comando /modificar para el bot
-@Bot.on_message(filters.command("modificar"))
+@Client.on_message(filters.command("modificar"))
 async def modificar(client, message):
     conf1_msg = await client.ask(message.chat.id, "Ingrese el nuevo valor de la configuración 1:")
     conf2_msg = await client.ask(message.chat.id, "Ingrese el nuevo valor de la configuración 2:")
@@ -192,11 +192,10 @@ async def add_session(bot, message):
             device_model="PC 64bit")
 
      return userbot
-# Ejecuta ambos clientes
-if __name__ == "__main__":
-    print ("Iniciando el bot...")
-    app = Bot()
-    app.run()
+
+print ("Iniciando el bot...")
+app = Bot()
+app.run()
 
     
 
