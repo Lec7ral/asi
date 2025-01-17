@@ -2,6 +2,7 @@ from pyrogram import Client, filters, idle
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup, CallbackQuery
 import re
 import os
+from aiohttp import web
 from pyrogram.errors import (
     ApiIdInvalid,
     PhoneNumberInvalid,
@@ -32,9 +33,38 @@ KEYWORD1 = None
 KEYWORD2 = None
 KEYWORD3= '#VENTA'
 
-# Inicializa el bot
-bot = Client("my_bot", api_hash=API_HASH,
-            api_id=API_ID, bot_token=BOT_TOKEN)
+routes = web.RouteTableDef()
+
+@routes.get("/", allow_head=True)
+async def root_route_handler(request):
+    return web.json_response("Join Telegram Channal @ALV")
+
+async def web_server():
+    web_app = web.Application(client_max_size=30000000)
+    web_app.add_routes(routes)
+    return web_app
+
+class Bot(Client): 
+    def __init__(self):
+        super().__init__(
+            "Prer",
+            api_hash=API_HASH,
+            api_id=API_ID,
+            bot_token=BOT_TOKEN,
+        )
+
+    async def start(self):
+        await super().start()
+        me = await self.get_me()
+         #web-response
+        app = web.AppRunner(await web_server())
+        await app.setup()
+        bind_address = "0.0.0.0"
+        await web.TCPSite(app, bind_address, 8080).start()
+        self.id = me.id
+        self.username = me.username
+        self.first_name = me.first_name
+        await idle()
 
 USERBOT = None
 handlers_setup = False
@@ -64,33 +94,33 @@ def setup_userbot_handlers():
                                 await client.send_callback_query(message.chat.id, button.callback_data)
         handlers_setup = True
         
-@bot.on_message(filters.command("start"))
+@Client.on_message(filters.command("start"))
 async def start(client, message):
     await client.send_message(message.chat.id, "¡Hola! Soy tu bot de Telegram. ¿En que puedo ayudarte?\nUtiliza uno de estos:\n\n/loging para loggearte con el userbot(solo una vez, sino seguro <b>CRASH<\b>)\n/iniciar para que comience la tarea en segundo plano\n/detener para detenerla/modificar para cambiar los terminos 1 y 2")
 
-@bot.on_message(filters.command("detener"))
+@Client.on_message(filters.command("detener"))
 async def detener(client, message):
     global USERBOT
     if USERBOT.connect():
         USERBOT.stop()
-        await bot.send_message(message.chat.id, "Deteniendo la tarea en segundo plano...")
+        await client.send_message(message.chat.id, "Deteniendo la tarea en segundo plano...")
     else:
-        await bot.send_message(message.chat.id, "El userbot ya esta off.")
+        await client.send_message(message.chat.id, "El userbot ya esta off.")
         
-@bot.on_message(filters.command("iniciar"))
+@Client.on_message(filters.command("iniciar"))
 async def iniciar(client, message):
     global USERBOT
     if not USERBOT:
-        await bot.send_message(message.chat.id, "No se ha iniciado el userbot.\n\n /login")
+        await client.send_message(message.chat.id, "No se ha iniciado el userbot.\n\n /login")
     elif USERBOT.connect():
-        await bot.send_message(message.chat.id, "Ya esta funcionando")
+        await client.send_message(message.chat.id, "Ya esta funcionando")
     else:
         USERBOT.start()
         setup_userbot_handlers()
-        await bot.send_message(message.chat.id, "La tarea en segundo plano ha sido iniciada.")
+        await client.send_message(message.chat.id, "La tarea en segundo plano ha sido iniciada.")
         
 # Comando /login para el bot
-@bot.on_message(filters.command("login"))
+@Client.on_message(filters.command("login"))
 async def start(client, message):
     global USERBOT
     userbot = await add_session(client, message)
@@ -98,7 +128,7 @@ async def start(client, message):
     
 
 # Comando /modificar para el bot
-@bot.on_message(filters.command("modificar"))
+@Client.on_message(filters.command("modificar"))
 async def modificar(client, message):
     conf1_msg = await client.ask(message.chat.id, "Ingrese el nuevo valor de la configuración 1:")
     conf2_msg = await client.ask(message.chat.id, "Ingrese el nuevo valor de la configuración 2:")
@@ -165,7 +195,8 @@ async def add_session(bot, message):
 # Ejecuta ambos clientes
 if __name__ == "__main__":
     print ("Iniciando el bot...")
-    bot.run()
+    app = Bot()
+    app.run()
 
     
 
