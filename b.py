@@ -94,11 +94,11 @@ def setup_userbot_handlers():
                                 await client.send_callback_query(message.chat.id, button.callback_data)
         handlers_setup = True
         
-@Client.on_message(filters.command("start"))
+@Bot.on_message(filters.command("start"))
 async def start(client, message):
     await client.send_message(message.chat.id, "¡Hola! Soy tu bot de Telegram. ¿En que puedo ayudarte?\nUtiliza uno de estos:\n\n/loging para loggearte con el userbot(solo una vez, sino seguro <b>CRASH<\b>)\n/iniciar para que comience la tarea en segundo plano\n/detener para detenerla/modificar para cambiar los terminos 1 y 2")
 
-@Client.on_message(filters.command("detener"))
+@Bot.on_message(filters.command("detener"))
 async def detener(client, message):
     global USERBOT
     if USERBOT.connect():
@@ -107,7 +107,7 @@ async def detener(client, message):
     else:
         await client.send_message(message.chat.id, "El userbot ya esta off.")
         
-@Client.on_message(filters.command("iniciar"))
+@Bot.on_message(filters.command("iniciar"))
 async def iniciar(client, message):
     global USERBOT
     if not USERBOT:
@@ -120,7 +120,7 @@ async def iniciar(client, message):
         await client.send_message(message.chat.id, "La tarea en segundo plano ha sido iniciada.")
         
 # Comando /login para el bot
-@Client.on_message(filters.command("login"))
+@Bot.on_message(filters.command("login"))
 async def start(client, message):
     global USERBOT
     userbot = await add_session(client, message)
@@ -128,7 +128,7 @@ async def start(client, message):
     
 
 # Comando /modificar para el bot
-@Client.on_message(filters.command("modificar"))
+@Bot.on_message(filters.command("modificar"))
 async def modificar(client, message):
     conf1_msg = await client.ask(message.chat.id, "Ingrese el nuevo valor de la configuración 1:")
     conf2_msg = await client.ask(message.chat.id, "Ingrese el nuevo valor de la configuración 2:")
