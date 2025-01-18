@@ -2,6 +2,7 @@ from pyrogram import Client, filters, idle
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup, CallbackQuery
 import re
 import os
+import logging
 from aiohttp import web
 from pyrogram.errors import (
     ApiIdInvalid,
@@ -65,7 +66,7 @@ class Bot(Client):
         self.id = me.id
         self.username = me.username
         self.first_name = me.first_name
-        print("hasta aqui")
+        logging.info("hasta aqui")
         await idle()
 # Inicializa el bot
 bot = Bot()
@@ -196,7 +197,7 @@ async def add_session(bote, message):
      return userbot
         
 if __name__ == "__main__":
-    print ("Iniciando el bot...")
+    logging.info ("Iniciando el bot...")
     bot.run()
 
     
