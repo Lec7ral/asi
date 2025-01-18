@@ -140,7 +140,6 @@ async def modificar(client, message):
     await client.send_message(message.chat.id, "Configuraciones modificadas!")
     
 async def add_session(bote, message):
-    try:
      user_id = int(message.from_user.id)
      api_id = API_ID
      api_hash = API_HASH
@@ -195,9 +194,7 @@ async def add_session(bote, message):
             device_model="PC 64bit")
 
      return userbot
-    except Exception as e:
-        print(f"Error al crear la sesion: {e}")
-# Ejecuta ambos clientes
+        
 if __name__ == "__main__":
     print ("Iniciando el bot...")
     bot.run()
