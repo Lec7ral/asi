@@ -86,7 +86,7 @@ def setup_userbot_handlers():
                     if match:
                         numero_por = float(match.group(1))  # Número después de "por"
                         numero_tasa = float(match.group(2))  # Número después de "Tasa de cambio"
-                        if numero_por >= KEYWORD1 and numero_tasa <= KEYWORD2:
+                        if numero_por <= KEYWORD1 and numero_tasa <= KEYWORD2:
                             if message.reply_markup:
                                 button = message.reply_markup.inline_keyboard[0][0]  # Presiona el primer botón
                                 await client.send_callback_query(message.chat.id, button.callback_data)
@@ -100,7 +100,7 @@ def setup_userbot_handlers():
         
 @bot.on_message(filters.command("start"))
 async def start(client, message):
-    await client.send_message(message.chat.id, "¡Hola! Soy tu bot de Telegram. ¿En que puedo ayudarte?\nUtiliza uno de estos:\n\n/loging para loggearte con el userbot(solo una vez, sino seguro <b>CRASH</b>)\n/iniciar para que comience la tarea en segundo plano\n/detener para detenerla/modificar para cambiar los terminos 1 y 2")
+    await client.send_message(message.chat.id, "¡Hola! Soy tu bot de Telegram.\n ¿En que puedo ayudarte?\nUtiliza uno de estos:\n\n/login para loggearte con el userbot(solo una vez, sino seguro <b>CRASH</b>)\n/iniciar para que comience la tarea en segundo plano\n/detener para detenerla\n/modificar para cambiar los terminos 1(precio) y 2(tasa)")
 
 @bot.on_message(filters.command("detener"))
 async def detener(client, message):
@@ -125,7 +125,7 @@ async def iniciar(client, message):
         
 # Comando /login para el bot
 @bot.on_message(filters.command("login"))
-async def start(client, message):
+async def login(client, message):
     global USERBOT
     userbot = await add_session(client, message)
     USERBOT = await userbot.start()
@@ -141,12 +141,13 @@ async def modificar(client, message):
     KEYWORD2 = conf2_msg.text
     await client.send_message(message.chat.id, "Configuraciones modificadas!")
     
-async def add_session(bot, message):
+async def add_session(bote, message):
+    try:
      user_id = int(message.from_user.id)
      api_id = API_ID
      api_hash = API_HASH
      t = "☞︎︎︎ » Por favor, ingresa tu número de teléfono para continuar: Ejemplo: +53 5xxxxxxx"
-     phone_number_msg = await bot.ask(chat_id=user_id, text=t)
+     phone_number_msg = await bote.ask(chat_id=user_id, text=t)
      if phone_number_msg.text=='/cancel':
         return await phone_number_msg.reply('Process Cancelled !')
      phone_number = phone_number_msg.text
@@ -162,7 +163,7 @@ async def add_session(bot, message):
         return
      try:
         phone_code_msg = None 
-        phone_code_msg = await bot.ask(user_id, "» Por favor, envía el OTP que has recibido de Telegram en tu cuenta.\nSi el OTP es 12345, por favor envíalo como P12345.", filters=filters.text, timeout=600)
+        phone_code_msg = await bote.ask(user_id, "» Por favor, envía el OTP que has recibido de Telegram en tu cuenta.\nSi el OTP es 12345, por favor envíalo como P12345.", filters=filters.text, timeout=600)
         if phone_code_msg.text=='/cancel':
            return await phone_code_msg.reply('Process Cancelled !')
      except TimeoutError:
@@ -179,7 +180,7 @@ async def add_session(bot, message):
         return
      except (SessionPasswordNeeded, SessionPasswordNeeded1):
         try:
-           two_step_msg = await bot.ask(user_id, "» ᴩʟᴇᴀsᴇ ᴇɴᴛᴇʀ ʏᴏᴜʀ **ᴛᴡᴏ sᴛᴇᴩ ᴠᴇʀɪғɪᴄᴀᴛɪᴏɴ** ᴩᴀssᴡᴏʀᴅ ᴛᴏ ᴄᴏɴᴛɪɴᴜᴇ.", filters=filters.text, timeout=300)
+           two_step_msg = await bote.ask(user_id, "» ᴩʟᴇᴀsᴇ ᴇɴᴛᴇʀ ʏᴏᴜʀ **ᴛᴡᴏ sᴛᴇᴩ ᴠᴇʀɪғɪᴄᴀᴛɪᴏɴ** ᴩᴀssᴡᴏʀᴅ ᴛᴏ ᴄᴏɴᴛɪɴᴜᴇ.", filters=filters.text, timeout=300)
         except TimeoutError:
            await phone_code_msg.reply("» ᴛɪᴍᴇ ʟɪᴍɪᴛ ʀᴇᴀᴄʜᴇᴅ ᴏғ 5 ᴍɪɴᴜᴛᴇs.\n\nᴩʟᴇᴀsᴇ sᴛᴀʀᴛ ɢᴇɴᴇʀᴀᴛɪɴɢ ʏᴏᴜʀ sᴇssɪᴏɴ ᴀɢᴀɪɴ.")
            return
@@ -196,6 +197,8 @@ async def add_session(bot, message):
             device_model="PC 64bit")
 
      return userbot
+    except Exception as e:
+        print(f"Error al crear la sesion: {e}")
 # Ejecuta ambos clientes
 if __name__ == "__main__":
     print ("Iniciando el bot...")
